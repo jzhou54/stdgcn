@@ -4,6 +4,7 @@ import numpy as np
 import pandas as pd
 import scanpy as sc
 import anndata
+import multiprocessing
 from tqdm.notebook import tqdm
 import random
 from sklearn.decomposition import NMF
@@ -174,17 +175,14 @@ def pseudo_spot_generation(sc_exp,
                           ):
     
     cell_type_num = len(sc_exp.obs['cell_type'].unique())
-
-    generated_spots = [
-        generate_a_spot(
-            sc_exp,
-            min_cell_number_in_spot,
-            max_cell_number_in_spot,
-            max_cell_types_in_spot,
-            generation_method,
-        )
-        for _ in tqdm(range(spot_num), desc='Generating pseudo-spots')
-    ]
+    
+    cores = multiprocessing.cpu_count()
+    if n_jobs == -1:
+        pool = multiprocessing.Pool(processes=cores)
+    else:
+        pool = multiprocessing.Pool(processes=n_jobs)
+    args = [(sc_exp, min_cell_number_in_spot, max_cell_number_in_spot, max_cell_types_in_spot, generation_method) for i in range(spot_num)]
+    generated_spots = pool.starmap(generate_a_spot, tqdm(args, desc='Generating pseudo-spots'))
     
     pseudo_spots = []
     pseudo_spots_table = np.zeros((spot_num, sc_exp.shape[1]), dtype=float)
