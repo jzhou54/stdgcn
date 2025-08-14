@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 import time
 import scanpy as sc
-import multiprocessing
+import os
 
 
 
@@ -38,8 +38,9 @@ class autoencoder(nn.Module):
 def auto_train(model, epoch_n, loss_fn, optimizer, data, cpu_num=-1, device='GPU'):
     
     if cpu_num == -1:
-        cores = multiprocessing.cpu_count()
-        torch.set_num_threads(cores)
+        cores = os.cpu_count()
+        if cores is not None:
+            torch.set_num_threads(cores)
     else:
         torch.set_num_threads(cpu_num)
     

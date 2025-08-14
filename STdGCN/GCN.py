@@ -4,7 +4,7 @@ import numpy as np
 from torch.autograd import Variable
 import math
 import time
-import multiprocessing
+import os
 from torch.nn.parameter import Parameter
 from torch.nn.modules.module import Module
 import torch.nn.functional as F
@@ -174,8 +174,9 @@ def conGCN_train(model,
             print('Use CPU as device.')
     
     if cpu_num == -1:
-        cores = multiprocessing.cpu_count()
-        torch.set_num_threads(cores)
+        cores = os.cpu_count()
+        if cores is not None:
+            torch.set_num_threads(cores)
     else:
         torch.set_num_threads(cpu_num)
     
